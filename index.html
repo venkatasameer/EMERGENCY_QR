@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1f4037, #99f2c8);
+            margin: 0;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 400px;
+        }
+        input, select {
+            width: 95%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: linear-gradient(to right, #ff5f6d, #ffc371);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: linear-gradient(to right, #ffc371, #ff5f6d);
+        }
+        .qr-container {
+            margin-top: 20px;
+        }
+        .qr-container img {
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>QR Code Generator</h2>
+        <input type="text" id="fullName" placeholder="Full Name" required>
+        <input type="text" id="vehicleNumber" placeholder="Vehicle Registration Number" required>
+        <select id="vehicleType">
+            <option value="Bike">Bike</option>
+            <option value="Car">Car</option>
+            <option value="Bus">Bus</option>
+            <option value="Lorry">Lorry</option>
+            <option value="Other">Other</option>
+        </select>
+        <input type="tel" id="mobileNumber" placeholder="Mobile Number" pattern="\d{10}" required>
+        <input type="tel" id="altNumber" placeholder="Alternative Number" pattern="\d{10}" required>
+        <input type="tel" id="emergencyContact" placeholder="Emergency Contact" pattern="\d{10}" required>
+        <select id="bloodGroup">
+            <option value="" disabled selected>Select Blood Group</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+        </select>
+        <input type="text" id="fullAddress" placeholder="Full Address" required>
+        <button onclick="generateQR()">Generate QR Code</button>
+        <button id="downloadBtn" onclick="downloadQR()">Download QR</button>
+        <div class="qr-container" id="qrOutput"></div>
+
+
+        <br>
+        <div class="developer">
+            Developed by <a href="https://www.linkedin.com/in/venkata-sameer-mulaveesala-4a9628288/" target="_blank">Sameer</a>
+          </div>
+          
+    </div>
+
+    <script>
+        function generateQR() {
+            let fullName = document.getElementById("fullName").value;
+            let vehicleNumber = document.getElementById("vehicleNumber").value;
+            let vehicleType = document.getElementById("vehicleType").value;
+            let mobileNumber = document.getElementById("mobileNumber").value;
+            let altNumber = document.getElementById("altNumber").value;
+            let emergencyContact = document.getElementById("emergencyContact").value;
+            let bloodGroup = document.getElementById("bloodGroup").value;
+            let fullAddress = document.getElementById("fullAddress").value;
+
+            if (!/^(?=(?:.*[A-Za-z]){4,})(?=(?:.*\d){6,})[A-Za-z\d]+$/.test(vehicleNumber)) {
+                alert("Please enter a valid vehicle number with at least four letters and six numbers.");
+                return;
+            }
+
+            if (!/\d{10}/.test(mobileNumber) || !/\d{10}/.test(altNumber) || !/\d{10}/.test(emergencyContact)) {
+                alert("Please enter a valid 10-digit phone number.");
+                return;
+            }
+
+            let qrData = `Name: ${fullName}\nVehicle: ${vehicleType} - ${vehicleNumber}\nMobile: ${mobileNumber}\nAlt: ${altNumber}\nEmergency: ${emergencyContact}\nBlood: ${bloodGroup}\nAddress: ${fullAddress}`;
+            let qrOutput = document.getElementById("qrOutput");
+            qrOutput.innerHTML = "";
+            let img = document.createElement("img");
+            img.id = "qrImage";
+            img.crossOrigin = "anonymous";
+            img.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrData)}`;
+            qrOutput.appendChild(img);
+        }
+
+        function downloadQR() {
+            let qrImage = document.getElementById("qrImage");
+            if (!qrImage) {
+                alert("Generate a QR code first!");
+                return;
+            }
+            fetch(qrImage.src)
+                .then(response => response.blob())
+                .then(blob => {
+                    let link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = "qr_code.png";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                })
+                .catch(error => console.error("Error downloading the QR code:", error));
+        }
+    </script>
+</body>
+</html>
